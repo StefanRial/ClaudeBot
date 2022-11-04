@@ -20,8 +20,6 @@ intents.messages = True
 intents.message_content = True
 client = Client(intents=intents)
 
-client.run("YOUR_DISCORD_BOT_API_KEY_HERE")
-
 openai.organization = "YOUR_OPENAI_ORGANIZATION_ID_HERE"
 openai.api_key = "YOUR_OPENAI_API_KEY_HERE"
 openai.Model.list()
@@ -59,5 +57,4 @@ async def claude(interaction: discord.Interaction, prompt: str):
 
     await interaction.edit_original_response(content=f"{mention} Here is your result", embed=embed)
 
-
-
+client.run("YOUR_DISCORD_BOT_API_KEY_HERE")
