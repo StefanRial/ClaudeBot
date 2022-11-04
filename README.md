@@ -7,6 +7,11 @@ Python Discord bot for using OpenAI's image generator DALL-E
 1. A discord application and bot user
 2. An OpenAI account with a set up payment plan
 
+### Install the required packages
+
+- openai
+- discord
+
 ### Open main.py and change the following values:
 
 1. **YOUR_DISCORD_SERVER_ID_HERE**
