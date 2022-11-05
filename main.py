@@ -10,6 +10,7 @@ E-Mail: mail.stefanrial@gmail.com
 import discord
 import openai
 import urllib.request
+import os
 from datetime import datetime
 from configparser import ConfigParser
 from discord import app_commands
@@ -33,6 +34,8 @@ SIZE_DEFAULT = config["settings"][str("default_size")]
 
 GUILD = discord.Object(id=SERVER_ID)
 
+if not os.path.isdir(FILE_PATH):
+    os.mkdir(FILE_PATH)
 
 class Client(discord.Client):
     def __init__(self, *, intents: discord.Intents):
