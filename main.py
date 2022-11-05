@@ -15,9 +15,9 @@ from datetime import datetime
 from configparser import ConfigParser
 from discord import app_commands
 
-file = "config.ini"
+config_file = "config.ini"
 config = ConfigParser(interpolation=None)
-config.read(file)
+config.read(config_file)
 
 SERVER_ID = config["discord"]["server_id"]
 DISCORD_API_KEY = config["discord"][str("api_key")]
@@ -48,10 +48,10 @@ class Client(discord.Client):
         await self.tree.sync(guild=GUILD)
 
 
-intents = discord.Intents.default()
-intents.messages = True
-intents.message_content = True
-client = Client(intents=intents)
+claude_intents = discord.Intents.default()
+claude_intents.messages = True
+claude_intents.message_content = True
+client = Client(intents=claude_intents)
 
 openai.organization = OPENAI_ORG
 openai.api_key = OPENAI_API_KEY
