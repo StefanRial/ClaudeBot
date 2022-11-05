@@ -37,6 +37,7 @@ GUILD = discord.Object(id=SERVER_ID)
 if not os.path.isdir(FILE_PATH):
     os.mkdir(FILE_PATH)
 
+
 class Client(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
