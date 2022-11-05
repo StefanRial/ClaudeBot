@@ -13,7 +13,7 @@ https://www.youtube.com/watch?v=B5I9xYnw6Nc
 - openai
 - discord
 
-### Open main.py and change the following values:
+### Open config.ini and change the following values:
 
 1. **YOUR_DISCORD_SERVER_ID_HERE**
 
