@@ -1,8 +1,32 @@
+"""
+This is a discord bot for generating images using OpenAI's DALL-E
+
+Author: Stefan Rial
+YouTube: https://youtube.com/@StefanRial
+GitHub: https://https://github.com/StefanRial/ClaudeBot
+E-Mail: mail.stefanrial@gmail.com
+"""
+
 import discord
 import openai
+from configparser import ConfigParser
 from discord import app_commands
 
-GUILD = discord.Object(id=YOUR_DISCORD_SERVER_ID_HERE)
+file = "config.ini"
+config = ConfigParser()
+config.read(file)
+
+SERVER_ID = config["discord"]["server_id"]
+DISCORD_API_KEY = config["discord"][str("api_key")]
+OPENAI_ORG = config["openai"][str("organization")]
+OPENAI_API_KEY = config["openai"][str("api_key")]
+
+SIZE_LARGE = "1024x1024"
+SIZE_MEDIUM = "512x512"
+SIZE_SMALL = "256x256"
+SIZE_DEFAULT = SIZE_LARGE
+
+GUILD = discord.Object(id=SERVER_ID)
 
 
 class Client(discord.Client):
@@ -20,10 +44,8 @@ intents.messages = True
 intents.message_content = True
 client = Client(intents=intents)
 
-client.run("YOUR_DISCORD_BOT_API_KEY_HERE")
-
-openai.organization = "YOUR_OPENAI_ORGANIZATION_ID_HERE"
-openai.api_key = "YOUR_OPENAI_API_KEY_HERE"
+openai.organization = OPENAI_ORG
+openai.api_key = OPENAI_API_KEY
 openai.Model.list()
 
 
@@ -38,16 +60,16 @@ async def claude(interaction: discord.Interaction, prompt: str):
     mention = interaction.user.mention
     await interaction.response.defer()
 
-    size = "1024x1024"
-    if prompt.find("256x256") != -1:
-        prompt = prompt.replace("256x256", "")
-        size = "256x256"
-    if prompt.find("512x512") != -1:
-        prompt = prompt.replace("512x512", "")
-        size = "512x512"
-    if prompt.find("1024x1024") != -1:
-        prompt = prompt.replace("1024x1024", "")
-        size = "1024x1024"
+    size = SIZE_DEFAULT
+    if prompt.find(SIZE_SMALL) != -1:
+        prompt = prompt.replace(SIZE_SMALL, "")
+        size = SIZE_SMALL
+    if prompt.find(SIZE_MEDIUM) != -1:
+        prompt = prompt.replace(SIZE_MEDIUM, "")
+        size = SIZE_MEDIUM
+    if prompt.find(SIZE_LARGE) != -1:
+        prompt = prompt.replace(SIZE_LARGE, "")
+        size = SIZE_LARGE
 
     await interaction.followup.send(content=f"{mention} Processing your image of {prompt}...")
 
@@ -59,5 +81,4 @@ async def claude(interaction: discord.Interaction, prompt: str):
 
     await interaction.edit_original_response(content=f"{mention} Here is your result", embed=embed)
 
-
-
+client.run(DISCORD_API_KEY)
