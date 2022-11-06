@@ -58,6 +58,42 @@ openai.api_key = OPENAI_API_KEY
 openai.Model.list()
 
 
+class Buttons(discord.ui.View):
+    def __init__(self, prompt: str, path: str, size: str):
+        super().__init__()
+        self.prompt = prompt
+        self.path = path
+        self.size = size
+
+    @discord.ui.button(label='Variation', style=discord.ButtonStyle.primary)
+    async def variation(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(f"Creating a variation of {self.prompt}...", ephemeral=True)
+        response = openai.Image.create_variation(image=open(self.path, "rb"), n=1, size=self.size)
+        await send_result(interaction, self.prompt, response, self.size)
+
+    @discord.ui.button(label='Redo', style=discord.ButtonStyle.grey)
+    async def redo(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(f"Redoing {self.prompt}...", ephemeral=True)
+        response = openai.Image.create(prompt=self.prompt, n=1, size=self.size)
+        await send_result(interaction, self.prompt, response, self.size)
+
+
+async def send_result(interaction: discord.Interaction, prompt: str, response, size: str):
+    mention = interaction.user.mention
+    channel = interaction.channel
+    image_url = response["data"][0]["url"]
+    image_name = download_image(image_url)
+    image_path = f"{FILE_PATH}{image_name}"
+
+    file = discord.File(image_path, filename=image_name)
+    embed = discord.Embed(title=prompt)
+    embed.set_image(url=f"attachment://{image_name}")
+
+    await channel.send(file=file, content=f"{mention} Here is your result", embed=embed,
+                       view=Buttons(prompt=prompt, path=image_path, size=size))
+    await interaction.delete_original_response()
+
+
 def download_image(url: str):
     file_name = f"{datetime.now().strftime(FILE_NAME_FORMAT)}.jpg"
     full_path = f"{FILE_PATH}{file_name}"
@@ -73,9 +109,7 @@ async def on_ready():
 @client.tree.command()
 @app_commands.describe(prompt="Description of the image that Claude should generate")
 async def claude(interaction: discord.Interaction, prompt: str):
-    mention = interaction.user.mention
-    channel = interaction.channel
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
 
     size = SIZE_DEFAULT
     if prompt.find(SIZE_SMALL) != -1:
@@ -88,19 +122,9 @@ async def claude(interaction: discord.Interaction, prompt: str):
         prompt = prompt.replace(SIZE_LARGE, "")
         size = SIZE_LARGE
 
-    await interaction.followup.send(content=f"{mention} Processing your image of {prompt}...")
+    await interaction.followup.send(content=f"Processing your image of {prompt}...", ephemeral=True)
 
     response = openai.Image.create(prompt=prompt, n=1, size=size)
-    image_url = response["data"][0]["url"]
-    image_name = download_image(image_url)
-    image_path = f"{FILE_PATH}{image_name}"
-
-    file = discord.File(image_path, filename=image_name)
-    embed = discord.Embed(title=prompt)
-    embed.set_image(url=f"attachment://{image_name}")
-
-    await channel.send(file=file, content=f"{mention} Here is your result", embed=embed)
-    await interaction.delete_original_response()
-
+    await send_result(interaction, prompt, response, size)
 
 client.run(DISCORD_API_KEY)
