@@ -70,12 +70,19 @@ class Buttons(discord.ui.View):
         await interaction.response.send_message(f"Creating a variation of {self.prompt}...", ephemeral=True)
         response = openai.Image.create_variation(image=open(self.path, "rb"), n=1, size=self.size)
         await send_result(interaction, self.prompt, response, self.size)
+        self.stop()
 
     @discord.ui.button(label='Redo', style=discord.ButtonStyle.grey)
     async def redo(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message(f"Redoing {self.prompt}...", ephemeral=True)
         response = openai.Image.create(prompt=self.prompt, n=1, size=self.size)
         await send_result(interaction, self.prompt, response, self.size)
+        self.stop()
+
+    @discord.ui.button(label='Delete', style=discord.ButtonStyle.red)
+    async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.message.delete()
+        self.stop()
 
 
 async def send_result(interaction: discord.Interaction, prompt: str, response, size: str):
