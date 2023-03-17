@@ -59,11 +59,12 @@ openai.Model.list()
 
 
 class Buttons(discord.ui.View):
-    def __init__(self, prompt: str, path: str, size: str):
-        super().__init__()
+    def __init__(self, prompt: str, path: str, size: str, message: discord.Message = None):
+        super().__init__(timeout=1800)
         self.prompt = prompt
         self.path = path
         self.size = size
+        self.message = message
 
     @discord.ui.button(label='Variation', style=discord.ButtonStyle.primary)
     async def variation(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -84,6 +85,15 @@ class Buttons(discord.ui.View):
         await interaction.message.delete()
         self.stop()
 
+    async def on_timeout(self):
+        if self.message:
+            try:
+                for button in self.children:
+                    button.disabled = True
+                await self.message.edit(view=self)
+            except discord.errors.NotFound:
+                pass
+
 
 async def send_result(interaction: discord.Interaction, prompt: str, response, size: str):
     mention = interaction.user.mention
@@ -96,8 +106,10 @@ async def send_result(interaction: discord.Interaction, prompt: str, response, s
     embed = discord.Embed(title=prompt)
     embed.set_image(url=f"attachment://{image_name}")
 
-    await channel.send(file=file, content=f"{mention} Here is your result", embed=embed,
-                       view=Buttons(prompt=prompt, path=image_path, size=size))
+    buttons_view = Buttons(prompt=prompt, path=image_path, size=size)
+    sent_message = await channel.send(file=file, content=f"{mention} Here is your result", embed=embed,
+                       view=buttons_view)
+    buttons_view.message = sent_message
     await interaction.delete_original_response()
 
 
