@@ -1,6 +1,5 @@
 # ClaudeBot
 Python Discord bot for using OpenAI's image generator DALL-E
-https://www.youtube.com/watch?v=B5I9xYnw6Nc
 
 ## Installation:
 
